@@ -1,2 +1,2 @@
 # TestingApplication
-Experiments with Python testing framework, CI/CD with Jenkins and TDD
+Experiments with Python testing framework, CI/CD with Jenkins and TDD.
