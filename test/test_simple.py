@@ -1,4 +1,5 @@
 import pytest
+import sqlite3
 
 class TestSimple(object):
     def test_equal_test(self):
