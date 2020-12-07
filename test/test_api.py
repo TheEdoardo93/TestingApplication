@@ -15,15 +15,15 @@ def test_index(init_flask_app):
     assert(response['data']['text'] == 'OK')
     assert(response['status_code'] == 200)
 
-def test_add_user(init_sqlite3_db, init_flask_app, init_users_db_table):
-    dao_handler = init_sqlite3_db
-    dao_handler._cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+def test_add_user(init_sqlite3_db, init_users_db_table, init_flask_app):
+    #dao_handler = init_sqlite3_db_connection
+    #dao_handler._cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     #print('\nTABLES: {}'.format(dao_handler._cursor.fetchall()))
 
-    dao_handler._cursor.execute("SELECT * FROM users;")
+    #dao_handler._cursor.execute("SELECT * FROM users;")
     #print('\nROWS: {}'.format(dao_handler._cursor.fetchall()))
 
-    dao_handler._cursor.execute("SELECT sql FROM sqlite_master WHERE name = 'users';")
+    #dao_handler._cursor.execute("SELECT sql FROM sqlite_master WHERE name = 'users';")
     #print('\nSCHEMA: {}'.format(dao_handler._cursor.fetchall()))
 
     data = {'name': 'Edoardo', 'surname': 'Casiraghi', 'birth_place': 'Merate',

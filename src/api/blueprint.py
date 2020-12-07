@@ -1,28 +1,28 @@
 from flask import Blueprint, request, jsonify
 import json
+import pytest
 
 from src.model.user import User
 from src.dao.dao import DAO
 
 app_blueprint = Blueprint('main', __name__)
+dao_handler = DAO(path_to_db='./test_DB.db')
 
 @app_blueprint.route('/', methods=['GET'])
 def index():
-    return jsonify({'text': 'OK'}) , 200
+    return jsonify({'text': 'OK'}), 200
 
+@pytest.mark.skip(msg='skip')
 @app_blueprint.route('/add_user', methods=['POST'])
 def add_user():
-    d = "C:\\Users\\edoardo.casiraghi\\AppData\\Local\\Temp\\pytest-of-edoardo.casiraghi\\pytest-298/test_DB"
-    #d='./test_DB'
-    dao_handler = DAO(db_name=d)
-    dao_handler._cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    print('\nTABLES 2: {}'.format(dao_handler._cursor.fetchall()))
+    #dao_handler._cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    #print('\nTABLES 2: {}'.format(dao_handler._cursor.fetchall()))
 
-    dao_handler._cursor.execute("SELECT * FROM users;")
-    print('\nROWS 2: {}'.format(dao_handler._cursor.fetchall()))
+    #dao_handler._cursor.execute("SELECT * FROM users;")
+    #print('\nROWS 2: {}'.format(dao_handler._cursor.fetchall()))
 
-    dao_handler._cursor.execute("SELECT sql FROM sqlite_master WHERE name = 'users';")
-    print('\nSCHEMA 2: {}'.format(dao_handler._cursor.fetchall()))
+    #dao_handler._cursor.execute("SELECT sql FROM sqlite_master WHERE name = 'users';")
+    #print('\nSCHEMA 2: {}'.format(dao_handler._cursor.fetchall()))
 
     # Get the data received by HTTP POST request
     request_data = json.loads(request.data)
@@ -36,4 +36,4 @@ def add_user():
     # Add the user to the SQLite database
     dao_handler.add_row_into_table(object=u, table_name='users')
 
-    return jsonify({'text': 'OK'}) , 200
+    return jsonify({'text': 'OK'}), 200

@@ -2,51 +2,60 @@ import os
 import sqlite3
 
 class DAO(object):
-    def __init__(self, db_name):
+    def __init__(self, path_to_db):
         # Define the path where to save the SQLite3 database data
-        self._path_to_db = '{}.db'.format(db_name)
+        self._path_to_db = path_to_db
         print('\n\npath_to_db: {}'.format(self._path_to_db))
 
-        self._db_name = self._path_to_db.split('/')[-1]
-        print('\ndb_name: {}'.format(self._db_name))
-
-        # Create the SQLite database
-        if self._db_name in os.listdir('.'):
-            print('WARN: the "{}" SQLite database file already exist. It will not be re-created.'.format(self._db_name))
-        else:
-            print('INFO: the "{}" SQLite database file does not exist. It will be created now.'.format(self._db_name))
-
         # Retrieve the connection to the (already created) database
-        self._connection = sqlite3.connect(database=self._path_to_db)
+        self._connection = sqlite3.connect(database=self._path_to_db, timeout=10)
         self._cursor = self._connection.cursor()
 
-    '''def drop_database(self, db_name):
-        os.remove('{}.db'.format(db_name))
+    def destroy(self):
+        print('closing cursor and connection')
+        self._cursor.close()
+        self._connection.close()
 
-    def drop_table(self, table_name):
+    def _create_table(self, table_name):
+        if table_name == 'users':
+            sql_statement = """ CREATE TABLE users (
+                name varchar NOT NULL,
+                surname varchar NOT NULL,
+                birth_place varchar NOT NULL,
+                birth_date varchar NOT NULL,
+                instruction_level varchar NOT NULL
+            ); """
+
+        print('CREATING NEW users TABLE...')
         try:
-            drop_table_sql_statement=None
-            if table_name == 'user':
-                drop_table_sql_statement = """ DROP TABLE users;"""
-
-            self._cursor.execute(drop_table_sql_statement)
+            self._cursor.execute(sql_statement)
         except Exception as e:
-            print(e)'''
+            print(e)
+
+    def _truncate_table(self, table_name):
+        if table_name == 'users':
+            sql_statement = """ DELETE FROM users; """
+
+        print('TRUNCATING EXISTING users TABLE...')
+        try:
+            self._cursor.execute(sql_statement)
+        except Exception as e:
+            print(e)
 
     def create_table(self, table_name):
-        if table_name == 'users':
-            create_table_sql_statement = """ CREATE TABLE users (
-                                                name varchar NOT NULL,
-                                                surname varchar NOT NULL,
-                                                birth_place varchar NOT NULL,
-                                                birth_date varchar NOT NULL,
-                                                instruction_level varchar NOT NULL
-                                            ); """
-            try:
-                self._cursor.execute(create_table_sql_statement)
+        # Check whether the table already exists or not
+        result = self._cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+        print('\nresult: {}'.format(result))
 
-            except Exception as e:
-                print(e)
+        # Get the already existing tables in the SQLite database
+        already_existing_table_names = [table_name[0] for table_name in result]
+        if len(result) == 0 or table_name not in already_existing_table_names:
+            # empty database or the database exists but the table does not exist
+            self._create_table(table_name=table_name)
+        else:
+            # truncate table
+            self._truncate_table(table_name=table_name)
+
 
     def _retrieve_last_id_of_table(self, table_name):
         # Retrieve the last ID assigned to "users" table
@@ -65,9 +74,12 @@ class DAO(object):
             self._add_user_into_users_table(user=object)
 
     def _add_user_into_users_table(self, user):
+        print('qui metodo')
         # Define the SQL statement to use for adding a new user in the "users" database table
         sql_statement = 'INSERT INTO users(name, surname, birth_date, birth_place, instruction_level)' + \
                         'VALUES (?, ?, ?, ?, ?);'
         self._cursor.execute(sql_statement, (user.name, user.surname, user.birth_date,
                                              user.birth_place, user.instruction_level))
+        print('pre commit')
         self._connection.commit()
+        print('post commit')

@@ -2,25 +2,37 @@ import pytest
 
 from src.model.user import User
 from src.dao.dao import DAO
+from src.dao.database import DataBaseHandler
 from src.api.app import InitFlaskApp
 
 @pytest.fixture(scope='session', name='init_sqlite3_db')
-def init_sqlite3_db(tmpdir_factory):
+def init_sqlite3_db():
     ### SET-UP ###
-    path_to_db = '{}/test_DB'.format(tmpdir_factory.getbasetemp())
+    path_to_db = '{}/test_DB.db'.format('.') #tmpdir_factory.getbasetemp()
     # Create a SQLite3 database one-shot
-    dao_handler = DAO(db_name=path_to_db)
+    database_handler = DataBaseHandler(db_name=path_to_db)
+
+    yield database_handler
+
+    ### TEAR-DOWN ###
+    database_handler.destroy()
+
+
+@pytest.fixture(scope='session', name='init_sqlite3_db_connection')
+def init_sqlite3_db_connection(init_sqlite3_db):
+    ### SET-UP ###
+    dao_handler = DAO(path_to_db=init_sqlite3_db._path_to_db)
 
     yield dao_handler
 
     ### TEAR-DOWN ###
-    dao_handler._cursor.close()
-    dao_handler._connection.close()
+    dao_handler.destroy()
+
 
 @pytest.fixture(scope='function', name='init_users_db_table')
-def create_users_table_in_db(init_sqlite3_db):
+def create_users_table_in_db(init_sqlite3_db, init_sqlite3_db_connection):
     ### SET-UP ###
-    dao_handler = init_sqlite3_db
+    dao_handler = init_sqlite3_db_connection
     dao_handler.create_table(table_name='users')
 
     yield
@@ -30,7 +42,7 @@ def create_users_table_in_db(init_sqlite3_db):
 
 ###################################################################
 
-@pytest.fixture(scope='module', name='return_new_users_correctly')
+@pytest.fixture(scope='function', name='return_new_users_correctly')
 def return_new_users_correctly():
     new_users_correct = [User(name='Edoardo', surname='Casiraghi', birth_date='25/04/1993', birth_place='Merate',
                               instruction_level='University'),
