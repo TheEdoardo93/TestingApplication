@@ -1,9 +1,8 @@
 import pytest
-import os
-import sqlite3
 
-from src.user import User
-from src.dao import DAO
+from src.model.user import User
+from src.dao.dao import DAO
+from src.api.app import InitFlaskApp
 
 @pytest.fixture(scope='session', name='init_sqlite3_db')
 def init_sqlite3_db(tmpdir_factory):
@@ -21,7 +20,6 @@ def init_sqlite3_db(tmpdir_factory):
 @pytest.fixture(scope='function', name='init_users_db_table')
 def create_users_table_in_db(init_sqlite3_db):
     ### SET-UP ###
-    print('setup init_users_db_table')
     dao_handler = init_sqlite3_db
     dao_handler.create_table(table_name='users')
 
@@ -44,3 +42,14 @@ def return_new_users_correctly():
                               instruction_level='Middle School')]
 
     return new_users_correct
+
+@pytest.fixture(scope='module', name='init_flask_app')
+def init_flask_app():
+    flask_handler = InitFlaskApp()
+    flask_app = flask_handler.create_app()
+
+    # Create a test client using the Flask application configured for testing
+    with flask_app.test_client() as testing_client:
+        # Establish an application context
+        with flask_app.app_context():
+            yield testing_client # this is where the testing happens!
