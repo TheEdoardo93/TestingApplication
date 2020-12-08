@@ -75,25 +75,47 @@ class DAO(object):
         # Get the ID of the object to remove from a specific table in the SQLite database
         if 'id' in object:
             object_id = object['id']
-        print('object_id: {}'.format(object_id))
 
         # Define the SQL statement to use for removing a specific user with ID equal to the one received
         try:
             sql_statement = """DELETE FROM {} WHERE id == {};""".format(table_name, object_id)
-            result = self._cursor.execute(sql_statement).fetchall()
+            self._cursor.execute(sql_statement)
             self._connection.commit()
-            print('result: {}'.format(result))
 
             sql_statement = """SELECT * FROM {};""".format(table_name)
             result = self._cursor.execute(sql_statement).fetchall()
-            print('result: {}'.format(result))
 
             if object_id not in [element[0] for element in result]:
                 # The particular row from a table name has been removed correctly
                 return True
             else:
                 # The particular row from a table name has not been removed correctly
-                return False
+                raise KeyError('ERROR: there is no {} with ID equal to "{}"'.format(table_name[:-1], object_id) +\
+                               ' in the "{}" table of the SQLite database.'.format(table_name))
+
+        except Exception as e:
+            raise ValueError
+
+    def get_row_from_table(self, object, table_name):
+        # Get the ID of the object to remove from a specific table in the SQLite database
+        if 'id' in object:
+            object_id = object['id']
+
+        # Define the SQL statement to use for removing a specific user with ID equal to the one received
+        try:
+            sql_statement = """SELECT * FROM {} WHERE id == {};""".format(table_name, object_id)
+            result = self._cursor.execute(sql_statement).fetchone()
+
+            # If a specific user with ID does not exist in the SQLite database, raise a KeyError Exception
+            if object_id == result[0]:
+                # The particular row from a table name has been removed correctly
+                # Return the description of a specific user by ID
+                return {'name': result[1], 'surname': result[2], 'birth_place': result[3],
+                        'birth_date': result[4], 'instruction_level': result[5]}
+            else:
+                # The particular row from a table name has not been removed correctly
+                raise KeyError('ERROR: there is no {} with ID equal to "{}"'.format(table_name[:-1], object_id) + \
+                               ' in the "{}" table of the SQLite database.'.format(table_name))
 
         except Exception as e:
             raise ValueError

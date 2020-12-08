@@ -39,13 +39,34 @@ def add_user():
 
 @app_blueprint.route('/delete_user/<int:user_id>', methods=['DELETE'])
 def delete_user_by_id(user_id):
-    print('route corretta con {}'.format(user_id))
-
     # Get a connection to the test SQLite database
     dao_handler = _get_dao_handler()
 
+    # Delete the specific user by him/her ID
     check = dao_handler.delete_row_from_table(table_name='users', object={'id': user_id})
     if check:
         return jsonify({'text': 'The user with ID equal to {} has been removed from SQLite database correctly.'.format(user_id)}), 200
     else:
         return jsonify({'text': 'The user with ID equal to {} has not been removed from SQLite database.'.format(user_id)}), 500
+
+@app_blueprint.route('/get_user/<int:user_id>', methods=['GET'])
+def get_user_by_id(user_id):
+    print('user_id: {}'.format(user_id))
+
+    # Get a connection to the test SQLite database
+    dao_handler = _get_dao_handler()
+
+    # Get the specific user by him/her ID
+    user_description = dao_handler.get_row_from_table(table_name='users', object={'id': user_id})
+    print('user_description: {}'.format(user_description))
+
+    # If the specific user does not exist in the SQLite database
+    if user_description is None:
+        return jsonify({'text': 'The user with ID equal to {} does not exist into the SQLite database.'.format(user_id)}, 200)
+
+    # Prepare the output string
+    return jsonify({'text': 'The user with ID equal to {} is {} {}'.format(user_id, user_description['name'], user_description['surname']) +\
+                       ', born in {} at {} and him/her instruction'.format(user_description['birth_date'], user_description['birth_place']) +\
+                        ' level is {}.'.format(user_description['instruction_level'])}), 200
+
+
