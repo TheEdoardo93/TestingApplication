@@ -20,5 +20,5 @@ def test_add_user(init_users_db_table, init_flask_app):
             'birth_date': '25/04/1993', 'instruction_level': 'University'}
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     response = _get_formatted_response(init_flask_app.post('/add_user', data=json.dumps(data), headers=headers))
-    assert(response['data']['text'] == 'OK')
+    assert(response['data']['text'] == 'The user has been added to SQLite database with ID auto-generated equal to "1".')
     assert(response['status_code'] == 200)

@@ -17,6 +17,7 @@ class DAO(object):
     def _create_table(self, table_name):
         if table_name == 'users':
             sql_statement = """ CREATE TABLE users (
+                id INTEGER PRIMARY KEY,
                 name varchar NOT NULL,
                 surname varchar NOT NULL,
                 birth_place varchar NOT NULL,
@@ -43,7 +44,6 @@ class DAO(object):
     def create_table(self, table_name):
         # Check whether the table already exists or not
         result = self._cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-        print('\nresult: {}'.format(result))
 
         # Get the already existing tables in the SQLite database
         already_existing_table_names = [table_name[0] for table_name in result]
@@ -54,22 +54,9 @@ class DAO(object):
             # truncate table
             self._truncate_table(table_name=table_name)
 
-
-    def _retrieve_last_id_of_table(self, table_name):
-        # Retrieve the last ID assigned to "users" table
-        last_id_sql_statement = 'SELECT MAX(id) from {};'.format(table_name)
-        self._cursor.execute(last_id_sql_statement)
-        last_id = self._cursor.fetchone()
-        print('WARN: the "{}" table in the database is empty.'.format(table_name))
-        if last_id[0] is None:
-            last_id = 0
-        print('last_id: {}'.format(last_id))
-
-        return last_id
-
     def add_row_into_table(self, object, table_name):
         if table_name == 'users':
-            self._add_user_into_users_table(user=object)
+            return self._add_user_into_users_table(user=object)
 
     def _add_user_into_users_table(self, user):
         # Define the SQL statement to use for adding a new user in the "users" database table
@@ -78,3 +65,8 @@ class DAO(object):
         self._cursor.execute(sql_statement, (user.name, user.surname, user.birth_date,
                                              user.birth_place, user.instruction_level))
         self._connection.commit()
+
+        # Retrieve the ID automatically assigned by SQLite database
+        user_id = self._cursor.lastrowid
+
+        return user_id

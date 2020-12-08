@@ -32,7 +32,7 @@ def add_user():
     u = User(name=request_data['name'], surname=request_data['surname'], birth_date=request_data['birth_date'],
              birth_place=request_data['birth_place'], instruction_level=request_data['instruction_level'])
 
-    # Add the user to the SQLite database
-    dao_handler.add_row_into_table(object=u, table_name='users')
+    # Add the user to the SQLite database and retrieve the ID automatically assigned to him/her
+    user_id = dao_handler.add_row_into_table(object=u, table_name='users')
 
-    return jsonify({'text': 'OK'}), 200
+    return jsonify({'text': 'The user has been added to SQLite database with ID auto-generated equal to "{}".'.format(user_id)}), 200
