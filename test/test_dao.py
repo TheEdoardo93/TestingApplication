@@ -1,6 +1,3 @@
-import pytest
-
-
 def test_adding_new_users_correctly(init_sqlite3_db, init_users_db_table,
                                     init_sqlite3_db_connection, return_new_users_correctly):
     # Retrieve the connection and the cursor to the "users.db" table

@@ -5,14 +5,12 @@ class DAO(object):
     def __init__(self, path_to_db):
         # Define the path where to save the SQLite3 database data
         self._path_to_db = path_to_db
-        print('\n\npath_to_db: {}'.format(self._path_to_db))
 
         # Retrieve the connection to the (already created) database
-        self._connection = sqlite3.connect(database=self._path_to_db, timeout=10)
+        self._connection = sqlite3.connect(database=self._path_to_db)
         self._cursor = self._connection.cursor()
 
     def destroy(self):
-        print('closing cursor and connection')
         self._cursor.close()
         self._connection.close()
 
@@ -74,12 +72,9 @@ class DAO(object):
             self._add_user_into_users_table(user=object)
 
     def _add_user_into_users_table(self, user):
-        print('qui metodo')
         # Define the SQL statement to use for adding a new user in the "users" database table
         sql_statement = 'INSERT INTO users(name, surname, birth_date, birth_place, instruction_level)' + \
                         'VALUES (?, ?, ?, ?, ?);'
         self._cursor.execute(sql_statement, (user.name, user.surname, user.birth_date,
                                              user.birth_place, user.instruction_level))
-        print('pre commit')
         self._connection.commit()
-        print('post commit')
