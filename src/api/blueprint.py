@@ -36,3 +36,16 @@ def add_user():
     user_id = dao_handler.add_row_into_table(object=u, table_name='users')
 
     return jsonify({'text': 'The user has been added to SQLite database with ID auto-generated equal to "{}".'.format(user_id)}), 200
+
+@app_blueprint.route('/delete_user/<int:user_id>', methods=['DELETE'])
+def delete_user_by_id(user_id):
+    print('route corretta con {}'.format(user_id))
+
+    # Get a connection to the test SQLite database
+    dao_handler = _get_dao_handler()
+
+    check = dao_handler.delete_row_from_table(table_name='users', object={'id': user_id})
+    if check:
+        return jsonify({'text': 'The user with ID equal to {} has been removed from SQLite database correctly.'.format(user_id)}), 200
+    else:
+        return jsonify({'text': 'The user with ID equal to {} has not been removed from SQLite database.'.format(user_id)}), 500

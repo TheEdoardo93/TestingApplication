@@ -22,3 +22,8 @@ def test_add_user(init_users_db_table, init_flask_app):
     response = _get_formatted_response(init_flask_app.post('/add_user', data=json.dumps(data), headers=headers))
     assert(response['data']['text'] == 'The user has been added to SQLite database with ID auto-generated equal to "1".')
     assert(response['status_code'] == 200)
+
+def test_delete_user_by_id(examples_users_db_table, init_flask_app):
+    response = _get_formatted_response(init_flask_app.delete('/delete_user/1'))
+    assert(response['data']['text'] == 'The user with ID equal to 1 has been removed from SQLite database correctly.')
+    assert(response['status_code'] == 200)

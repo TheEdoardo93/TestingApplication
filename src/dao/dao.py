@@ -70,3 +70,30 @@ class DAO(object):
         user_id = self._cursor.lastrowid
 
         return user_id
+
+    def delete_row_from_table(self, object, table_name):
+        # Get the ID of the object to remove from a specific table in the SQLite database
+        if 'id' in object:
+            object_id = object['id']
+        print('object_id: {}'.format(object_id))
+
+        # Define the SQL statement to use for removing a specific user with ID equal to the one received
+        try:
+            sql_statement = """DELETE FROM {} WHERE id == {};""".format(table_name, object_id)
+            result = self._cursor.execute(sql_statement).fetchall()
+            self._connection.commit()
+            print('result: {}'.format(result))
+
+            sql_statement = """SELECT * FROM {};""".format(table_name)
+            result = self._cursor.execute(sql_statement).fetchall()
+            print('result: {}'.format(result))
+
+            if object_id not in [element[0] for element in result]:
+                # The particular row from a table name has been removed correctly
+                return True
+            else:
+                # The particular row from a table name has not been removed correctly
+                return False
+
+        except Exception as e:
+            raise ValueError

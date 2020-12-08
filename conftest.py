@@ -84,3 +84,23 @@ def init_flask_app(init_sqlite3_db):
         # Establish an application context
         with flask_app.app_context():
             yield testing_client # this is where the testing happens!
+
+@pytest.fixture(scope='function', name='examples_users_db_table')
+def create_users_table_in_db_with_test_users_already_added(init_sqlite3_db, init_sqlite3_db_connection,
+                                                           return_new_users_correctly):
+    ### SET-UP ###
+    dao_handler = init_sqlite3_db_connection
+    ### STEP 1: create an empty "users" table ###
+    dao_handler.create_table(table_name='users')
+
+    ### STEP 2: # add some test users in the "users" table ###
+    for index, user in enumerate(return_new_users_correctly):
+        # Add a user and retrieve him/her ID
+        user_id = dao_handler.add_row_into_table(object=user, table_name='users')
+        assert (user_id == index + 1)
+
+    yield
+
+    ### TEAR-DOWN ###
+    print('teardown init_users_db_table')
+    #@TODO: drop table in the database
