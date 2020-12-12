@@ -15,4 +15,4 @@ class DataBaseHandler(object):
 
     def destroy(self):
         print('INFO: destroying the SQLite database...')
-        os.remove(self._path_to_db)
+        #os.remove(self._path_to_db)

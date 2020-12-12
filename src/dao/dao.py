@@ -77,24 +77,21 @@ class DAO(object):
             object_id = object['id']
 
         # Define the SQL statement to use for removing a specific user with ID equal to the one received
-        try:
-            sql_statement = """DELETE FROM {} WHERE id == {};""".format(table_name, object_id)
-            self._cursor.execute(sql_statement)
-            self._connection.commit()
+        sql_statement = """SELECT * FROM {};""".format(table_name)
+        result = self._cursor.execute(sql_statement).fetchall()
+        if object_id not in [element[0] for element in result]:
+            # The particular row from a table name has not been removed correctly
+            raise ValueError('There is no user with ID equal to "{}" into the SQLite database.'.format(object_id))
 
-            sql_statement = """SELECT * FROM {};""".format(table_name)
-            result = self._cursor.execute(sql_statement).fetchall()
+        sql_statement = """DELETE FROM {} WHERE id = {};""".format(table_name, object_id)
+        self._cursor.execute(sql_statement)
+        self._connection.commit()
 
-            if object_id not in [element[0] for element in result]:
-                # The particular row from a table name has been removed correctly
-                return True
-            else:
-                # The particular row from a table name has not been removed correctly
-                raise KeyError('ERROR: there is no {} with ID equal to "{}"'.format(table_name[:-1], object_id) +\
-                               ' in the "{}" table of the SQLite database.'.format(table_name))
+        sql_statement = """SELECT * FROM {};""".format(table_name)
+        result = self._cursor.execute(sql_statement).fetchall()
 
-        except Exception as e:
-            raise ValueError
+        if object_id in [element[0] for element in result]:
+            raise ValueError('The user with ID equal to "{}" has not been removed correctly from the SQLite database.')
 
     def get_row_from_table(self, object, table_name):
         # Get the ID of the object to remove from a specific table in the SQLite database
@@ -103,7 +100,7 @@ class DAO(object):
 
         # Define the SQL statement to use for removing a specific user with ID equal to the one received
         try:
-            sql_statement = """SELECT * FROM {} WHERE id == {};""".format(table_name, object_id)
+            sql_statement = """SELECT * FROM {} WHERE id = {};""".format(table_name, object_id)
             result = self._cursor.execute(sql_statement).fetchone()
 
             # If a specific user with ID does not exist in the SQLite database, raise a KeyError Exception
@@ -119,3 +116,45 @@ class DAO(object):
 
         except Exception as e:
             raise ValueError
+
+    def update_row_in_table(self, table_name, object):
+        def _prepare_sql_update_statement(new_data_dict):
+            update_values_stmt = ''
+            for k, v in new_data_dict.items():
+                update_values_stmt += '{} = "{}", '.format(k, v)
+            update_values_stmt = update_values_stmt.rstrip(', ')
+
+            return update_values_stmt
+
+        # Get the ID of the object to remove from a specific table in the SQLite database
+        if 'id' in object:
+            object_id = object['id']
+
+        # Define the SQL statement to use for removing a specific user with ID equal to the one received
+        sql_statement = """SELECT * FROM {};""".format(table_name)
+        result = self._cursor.execute(sql_statement).fetchall()
+        if object_id not in [element[0] for element in result]:
+            # The particular row from a table name has not been removed correctly
+            raise ValueError('There is no user with ID equal to "{}" into the SQLite database.'.format(object_id))
+
+        # Remove the 'id' of the user
+        new_data_dict = {k: v for k, v in object.items() if k != 'id'}
+        if len(new_data_dict) == 0:
+            raise ValueError('No fields to update for user with ID equal to "{}"'.format(object_id) +\
+                             ' has been received by the server.')
+
+        # Define the portion of the SQL DML statement for updating the user field(s)
+        update_values_stmt = _prepare_sql_update_statement(new_data_dict=new_data_dict)
+
+        # Update the found user with new data values
+        sql_statement = """UPDATE {} SET {} WHERE id = {};""".format(table_name, update_values_stmt, object_id)
+        self._cursor.execute(sql_statement)
+        self._connection.commit()
+
+        sql_statement = """SELECT * FROM {} WHERE id = {};""".format(table_name, object_id)
+        result = self._cursor.execute(sql_statement).fetchone()
+
+        support_dict = {'id': 0, 'name': 1, 'surname': 2, 'birth_place': 3, 'birth_date': 4, 'instruction_level': 5}
+        for field, new_value in new_data_dict.items():
+            if result[support_dict[field]] != new_value:
+                raise AttributeError

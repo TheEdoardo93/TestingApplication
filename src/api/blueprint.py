@@ -35,7 +35,9 @@ def add_user():
     # Add the user to the SQLite database and retrieve the ID automatically assigned to him/her
     user_id = dao_handler.add_row_into_table(object=u, table_name='users')
 
-    return jsonify({'text': 'The user has been added to SQLite database with ID auto-generated equal to "{}".'.format(user_id)}), 200
+    return jsonify({'text': 'The user has been added to SQLite database with ID auto-generated' +\
+                            ' equal to "{}".'.format(user_id)}), 201
+
 
 @app_blueprint.route('/delete_user/<int:user_id>', methods=['DELETE'])
 def delete_user_by_id(user_id):
@@ -43,22 +45,19 @@ def delete_user_by_id(user_id):
     dao_handler = _get_dao_handler()
 
     # Delete the specific user by him/her ID
-    check = dao_handler.delete_row_from_table(table_name='users', object={'id': user_id})
-    if check:
-        return jsonify({'text': 'The user with ID equal to {} has been removed from SQLite database correctly.'.format(user_id)}), 200
-    else:
-        return jsonify({'text': 'The user with ID equal to {} has not been removed from SQLite database.'.format(user_id)}), 500
+    dao_handler.delete_row_from_table(table_name='users', object={'id': user_id})
+
+    return jsonify({'text': 'The user with ID equal to "{}" has been removed'.format(user_id) +\
+                            ' from the SQLite database correctly.'}), 200
+
 
 @app_blueprint.route('/get_user/<int:user_id>', methods=['GET'])
 def get_user_by_id(user_id):
-    print('user_id: {}'.format(user_id))
-
     # Get a connection to the test SQLite database
     dao_handler = _get_dao_handler()
 
     # Get the specific user by him/her ID
     user_description = dao_handler.get_row_from_table(table_name='users', object={'id': user_id})
-    print('user_description: {}'.format(user_description))
 
     # If the specific user does not exist in the SQLite database
     if user_description is None:
@@ -70,3 +69,17 @@ def get_user_by_id(user_id):
                         ' level is {}.'.format(user_description['instruction_level'])}), 200
 
 
+@app_blueprint.route('/update_user/<int:user_id>', methods=['PUT'])
+def update_user_by_id(user_id):
+    # Get a connection to the test SQLite database
+    dao_handler = _get_dao_handler()
+
+    # Get the data received by HTTP POST request
+    request_data = json.loads(request.data)
+
+    # Update the user with the new values received as input
+    object = {**{'id': user_id}, **request_data}
+    dao_handler.update_row_in_table(table_name='users', object=object)
+
+    return jsonify({'text': 'The user with ID equal to "{}" has been updated'.format(user_id) +\
+                    ' in the SQLite database correctly.'}), 200
