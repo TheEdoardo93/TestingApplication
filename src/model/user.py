@@ -11,9 +11,7 @@ class User(object):
         self.birth_place = birth_place
         self.instruction_level = instruction_level
 
-        print('self.birth_date: {}'.format(self.birth_date))
         self.age = self.compute_age_from_birth_date(self.convert_date_to_standard_format(self.birth_date))
-        print('self.age: {}'.format(self.age))
 
     ### GETTER methods ###
     @property

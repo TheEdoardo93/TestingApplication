@@ -27,6 +27,8 @@ def add_user():
 
     # Get the data received by HTTP POST request
     request_data = json.loads(request.data)
+    if len(request_data) == 0:
+        raise ValueError('ERROR: no data have been received.')
 
     # Create a User object with the information about him/her passed by HTTP request
     u = User(name=request_data['name'], surname=request_data['surname'], birth_date=request_data['birth_date'],

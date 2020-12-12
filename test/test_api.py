@@ -25,6 +25,32 @@ def test_add_user_correctly(init_users_db_table, init_flask_app):
     assert(response['status_code'] == 201)
 
 
+def test_add_user_with_one_field_none(init_users_db_table, init_flask_app):
+    data = {'name': 'Edoardo', 'surname': None, 'birth_place': 'Merate',
+            'birth_date': '25/04/1993', 'instruction_level': 'University'}
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+
+    with pytest.raises(ValueError):
+        _ = init_flask_app.post('/add_user', data=json.dumps(data), headers=headers)
+
+
+def test_add_user_without_data(init_users_db_table, init_flask_app):
+    data = {}
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+
+    with pytest.raises(ValueError):
+        _ = init_flask_app.post('/add_user', data=json.dumps(data), headers=headers)
+
+
+def test_add_user_with_many_fields_none(init_users_db_table, init_flask_app):
+    data = {'name': 'Edoardo', 'surname': None, 'birth_place': 'Merate',
+            'birth_date': None, 'instruction_level': None}
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+
+    with pytest.raises(ValueError):
+        _ = init_flask_app.post('/add_user', data=json.dumps(data), headers=headers)
+
+
 def test_delete_user_without_passing_id(examples_users_db_table, init_flask_app):
     with pytest.raises(json.decoder.JSONDecodeError):
         response = _get_formatted_response(init_flask_app.delete('/delete_user/'))

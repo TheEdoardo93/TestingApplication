@@ -23,7 +23,8 @@ class DAO(object):
                 surname varchar NOT NULL,
                 birth_place varchar NOT NULL,
                 birth_date varchar NOT NULL,
-                instruction_level varchar NOT NULL
+                instruction_level varchar NOT NULL,
+                age INTEGER NOT NULL
             ); """
 
         try:
@@ -58,9 +59,9 @@ class DAO(object):
 
     def _add_user_into_users_table(self, user):
         # Define the SQL statement to use for adding a new user in the "users" database table
-        sql_statement = 'INSERT INTO users(name, surname, birth_date, birth_place, instruction_level)' + \
-                        'VALUES (?, ?, ?, ?, ?);'
-        self._cursor.execute(sql_statement, (user.name, user.surname, user.birth_date,
+        sql_statement = 'INSERT INTO users(name, surname, birth_date, age, birth_place, instruction_level)' + \
+                        'VALUES (?, ?, ?, ?, ?, ?);'
+        self._cursor.execute(sql_statement, (user.name, user.surname, user.birth_date, user.age,
                                              user.birth_place, user.instruction_level))
         self._connection.commit()
 
