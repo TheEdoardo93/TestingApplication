@@ -11,6 +11,10 @@ class User(object):
         self.birth_place = birth_place
         self.instruction_level = instruction_level
 
+        print('self.birth_date: {}'.format(self.birth_date))
+        self.age = self.compute_age_from_birth_date(self.convert_date_to_standard_format(self.birth_date))
+        print('self.age: {}'.format(self.age))
+
     ### GETTER methods ###
     @property
     def name(self):
@@ -31,6 +35,10 @@ class User(object):
     @property
     def instruction_level(self):
         return self._instruction_level
+
+    @property
+    def age(self):
+        return self._age
 
     ### SETTER methods ###
     @name.setter
@@ -64,11 +72,16 @@ class User(object):
                                  '"High School or "University".')
         self._instruction_level = instruction_level
 
-    def compute_age_from_birth_date(self):
+    @age.setter
+    def age(self, age):
+        self._age = age
+
+    def compute_age_from_birth_date(self, birth_date):
         # Retrieve the current date
         current_date = datetime.now()
         # Convert the birth date from string type to datetime type
-        birth_date = datetime.strptime(self.birth_date, '%d/%m/%Y')
+        birth_date = datetime.strptime(birth_date, '%d/%m/%Y')
+
         # Derive the age of a user as the difference between the current date and the birth date of the user
         age = math.floor( float( (current_date - birth_date).days / 365 ) )
         # If the difference between them is negative, then it is a error to capture
@@ -77,9 +90,7 @@ class User(object):
 
         return age
 
-    def convert_date_to_standard_format(self):
-        birth_date = self.birth_date
-
+    def convert_date_to_standard_format(self, birth_date):
         # If there are both "-" and "/" characters that split day, month and year, it is a not understandable format
         if '-' in birth_date and '/' in birth_date:
             raise ValueError('ERROR: in a date can not be both "-" and "/" characters.')
