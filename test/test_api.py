@@ -1,6 +1,5 @@
 import json
 import pytest
-import os
 
 
 def _get_formatted_response(response):
