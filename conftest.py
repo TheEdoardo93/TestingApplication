@@ -1,5 +1,4 @@
 import pytest
-import configparser
 import os
 
 from src.model.user import User

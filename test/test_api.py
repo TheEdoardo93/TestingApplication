@@ -10,8 +10,8 @@ def _get_formatted_response(response):
     return result_dict
 
 
-def test_status_correctly(init_flask_app):
-    response = _get_formatted_response(init_flask_app.get('/'))
+def test_flask_up_and_running(init_flask_app):
+    response = _get_formatted_response(init_flask_app.get('/up_and_running'))
     assert(response['data']['text'] == 'OK')
     assert(response['status_code'] == 200)
 

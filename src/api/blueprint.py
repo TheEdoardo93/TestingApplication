@@ -16,9 +16,11 @@ def _get_dao_handler():
 
     return dao_handler
 
-@app_blueprint.route('/', methods=['GET'])
-def index():
+
+@app_blueprint.route('/up_and_running', methods=['GET'])
+def up_and_running():
     return jsonify({'text': 'OK'}), 200
+
 
 @app_blueprint.route('/add_user', methods=['POST'])
 def add_user():
