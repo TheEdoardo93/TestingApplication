@@ -2,6 +2,7 @@ import pytest
 import os
 
 from src.model.user import User
+from src.model.course import Course
 from src.dao.dao import DAO
 from src.dao.database import DataBaseHandler
 from src.api.app import InitFlaskApp
@@ -55,10 +56,22 @@ def create_users_table_in_db(init_sqlite3_db, init_sqlite3_db_connection):
     yield
 
     ### TEAR-DOWN ###
-    print('teardown init_users_db_table')
-    #@TODO: drop table in the database
+    #@TODO: drop "users" table in the SQLite database
+
+
+@pytest.fixture(scope='function', name='init_courses_db_table')
+def create_courses_table_in_db(init_sqlite3_db, init_sqlite3_db_connection):
+    ### SET-UP ###
+    dao_handler = init_sqlite3_db_connection
+    dao_handler.create_table(table_name='courses')
+
+    yield
+
+    ### TEAR-DOWN ###
+    #@TODO: drop "courses" table in the SQLite database
 
 ###################################################################
+
 
 @pytest.fixture(scope='module', name='return_new_users_correctly')
 def return_new_users_correctly():
@@ -73,6 +86,7 @@ def return_new_users_correctly():
 
     return new_users_correct
 
+
 @pytest.fixture(scope='module', name='init_flask_app')
 def init_flask_app(init_sqlite3_db):
     flask_handler = InitFlaskApp()
@@ -83,6 +97,7 @@ def init_flask_app(init_sqlite3_db):
         # Establish an application context
         with flask_app.app_context():
             yield testing_client # this is where the testing happens!
+
 
 @pytest.fixture(scope='function', name='examples_users_db_table')
 def create_users_table_in_db_with_test_users_already_added(init_sqlite3_db, init_sqlite3_db_connection,
@@ -102,4 +117,37 @@ def create_users_table_in_db_with_test_users_already_added(init_sqlite3_db, init
 
     ### TEAR-DOWN ###
     print('teardown init_users_db_table')
+    #@TODO: drop table in the database
+
+
+@pytest.fixture(scope='module', name='return_new_courses_correctly')
+def return_new_courses_correctly():
+    new_courses_correct = [Course(name='Programming Languages 1', professor='John Sky', tutor=None,
+                                  academic_year='2018/2019', academic_semester=2, credits_number=10, description=None),
+                           Course(name='Linear Algebra 1', professor='Peter Snow', tutor='Steven Terry',
+                                  academic_year='2015/2016', academic_semester=1, credits_number=5, description='Mathematics.'),
+                           Course(name='Database 1', professor='Carlos Betty', tutor='Andrew McGuire',
+                                  academic_year='2018/2019', academic_semester=1, credits_number=8, description='SQL.')]
+
+    return new_courses_correct
+
+
+@pytest.fixture(scope='function', name='examples_courses_db_table')
+def create_courses_table_in_db_with_test_courses_already_added(
+        init_sqlite3_db, init_sqlite3_db_connection, return_new_courses_correctly):
+    ### SET-UP ###
+    dao_handler = init_sqlite3_db_connection
+    ### STEP 1: create an empty "courses" table ###
+    dao_handler.create_table(table_name='courses')
+
+    ### STEP 2: # add some test courses in the "courses" table ###
+    for index, course in enumerate(return_new_courses_correctly):
+        # Add a user and retrieve him/her ID
+        course_id = dao_handler.add_row_into_table(object=course, table_name='courses')
+        assert (course_id == index + 1)
+
+    yield
+
+    ### TEAR-DOWN ###
+    print('teardown init_courses_db_table')
     #@TODO: drop table in the database

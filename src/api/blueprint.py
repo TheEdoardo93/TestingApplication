@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 import json
 
 from src.model.user import User
+from src.model.course import Course
 from src.dao.dao import DAO
 
 app_blueprint = Blueprint('main', __name__)
@@ -87,3 +88,56 @@ def update_user_by_id(user_id):
 
     return jsonify({'text': 'The user with ID equal to "{}" has been updated'.format(user_id) +\
                     ' in the SQLite database correctly.'}), 200
+
+
+@app_blueprint.route('/create_course', methods=['POST'])
+def create_user():
+    # Get a connection to the test SQLite database
+    dao_handler = _get_dao_handler()
+
+    # Get the data received by HTTP POST request
+    request_data = json.loads(request.data)
+    if len(request_data) == 0:
+        raise ValueError('ERROR: no data have been received.')
+
+    # Create a Course object with the information about him/her passed by HTTP request
+    c = Course(name=request_data['name'], professor=request_data['professor'], tutor=request_data['tutor'],
+               academic_year=request_data['academic_year'], academic_semester=request_data['academic_semester'],
+               credits_number=request_data['credits_number'], description=request_data['description'])
+
+    # Add the course to the SQLite database and retrieve the ID automatically assigned to it
+    course_id = dao_handler.add_row_into_table(object=c, table_name='courses')
+
+    return jsonify({'text': 'The course has been created to SQLite database with ID auto-generated' + \
+                            ' equal to "{}".'.format(course_id)}), 201
+
+@app_blueprint.route('/delete_course/<int:course_id>', methods=['DELETE'])
+def delete_course_by_id(course_id):
+    # Get a connection to the test SQLite database
+    dao_handler = _get_dao_handler()
+
+    # Delete the specific course by its ID
+    dao_handler.delete_row_from_table(table_name='courses', object={'id': course_id})
+
+    return jsonify({'text': 'The course with ID equal to "{}" has been removed'.format(course_id) +\
+                            ' from the SQLite database correctly.'}), 200
+
+
+@app_blueprint.route('/get_course/<int:course_id>', methods=['GET'])
+def get_course_by_id(course_id):
+    # Get a connection to the test SQLite database
+    dao_handler = _get_dao_handler()
+
+    # Get the specific course by him/her ID
+    course_description = dao_handler.get_row_from_table(table_name='courses', object={'id': course_id})
+
+    # If the specific user does not exist in the SQLite database
+    if course_description is None:
+        return jsonify({'text': 'The course with ID equal to "{}" does not exist into the SQLite database.'.format(course_id)}, 200)
+
+    # Prepare the output string
+    return jsonify({'text': 'The course with ID equal to "{}" is {},'.format(course_id, course_description['name']) +\
+                            ' held by {} during the academic year {}'.format(course_description['professor'],
+                                                                             course_description['academic_year']) +\
+                            ' in the {}° semester and it is'.format(course_description['academic_semester']) +\
+                            ' {} credits.'.format(course_description['credits_number'])}), 200

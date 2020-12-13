@@ -16,6 +16,7 @@ class DAO(object):
         self._connection.close()
 
     def _create_table(self, table_name):
+        sql_statement=None
         if table_name == 'users':
             sql_statement = """ CREATE TABLE users (
                 id INTEGER PRIMARY KEY,
@@ -26,9 +27,20 @@ class DAO(object):
                 instruction_level varchar NOT NULL,
                 age INTEGER NOT NULL
             ); """
-
+        elif table_name == 'courses':
+            sql_statement = """ CREATE TABLE courses (
+                id INTEGER PRIMARY KEY,
+                name varchar NOT NULL,
+                professor varchar NOT NULL,
+                tutor varchar NULL,
+                academic_year varchar NOT NULL,
+                academic_semester varchar NOT NULL,
+                credits_number INT NOT NULL,
+                description varchar NULL
+            ); """
         try:
             self._cursor.execute(sql_statement)
+            self._connection.commit()
         except Exception as e:
             print(e)
 
@@ -37,6 +49,7 @@ class DAO(object):
 
         try:
             self._cursor.execute(sql_statement)
+            self._connection.commit()
         except Exception as e:
             print(e)
 
@@ -56,6 +69,21 @@ class DAO(object):
     def add_row_into_table(self, object, table_name):
         if table_name == 'users':
             return self._add_user_into_users_table(user=object)
+        elif table_name == 'courses':
+            return self._add_course_into_courses_table(course=object)
+
+    def _add_course_into_courses_table(self, course):
+        # Define the SQL statement to use for adding a new course in the "courses" database table
+        sql_statement = 'INSERT INTO courses(name, professor, tutor, academic_year, academic_semester, credits_number, description)' + \
+                        'VALUES (?, ?, ?, ?, ?, ?, ?);'
+        self._cursor.execute(sql_statement, (course.name, course.professor, course.tutor, course.academic_year,
+                                             course.academic_semester, course.credits_number, course.description))
+        self._connection.commit()
+
+        # Retrieve the ID automatically assigned by SQLite database
+        course_id = self._cursor.lastrowid
+
+        return course_id
 
     def _add_user_into_users_table(self, user):
         # Define the SQL statement to use for adding a new user in the "users" database table
